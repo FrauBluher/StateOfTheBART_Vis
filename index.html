@@ -46,9 +46,14 @@
     });
 
     parser.parse();
-
     var BARTkml = "http://api.bart.gov/kml/bart.kml";
     var kml = new KMLLayer(BARTkml);
+    kml.on("load", function() {
+      var layers = kml.getLayers();
+      console.log(layers.length);
+    });
+    //dojo.forEach(layers, function(lyr) { console.log("HI"); } );
+
     map.addLayer(kml);
   });
 </script>
