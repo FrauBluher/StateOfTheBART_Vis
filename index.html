@@ -46,13 +46,22 @@
     });
 
     parser.parse();
+
     var BARTkml = "http://api.bart.gov/kml/bart.kml";
     var kml = new KMLLayer(BARTkml);
+
+    //We can only operate on the KML after it has loaded.
     kml.on("load", function() {
       var layers = kml.getLayers();
-      console.log(layers.length);
+      console.log("KML has two layers.");
+      console.log(layers[0].type);
+      console.log(layers[0].geometryType);
+
+      console.log(layers[1].type);
+      console.log(layers[1].geometryType);
+
+
     });
-    //dojo.forEach(layers, function(lyr) { console.log("HI"); } );
 
     map.addLayer(kml);
   });
