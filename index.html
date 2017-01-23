@@ -40,26 +40,37 @@
         "dojo/domReady!",
         "esri/layers/GraphicsLayer",
         "esri/graphic",
-        "esri/symbols/SimpleFillSymbol"
+        "esri/symbols/SimpleFillSymbol",
+        "dojo/dom",
+        "dojo/dom-attr",
+        "esri/layers/KMLFolder",
+        "esri/symbols/MarkerSymbol",
+        "esri/symbols/SimpleMarkerSymbol",
+        "esri/symbols/SimpleLineSymbol",
+        "esri/Color"
     ], function(
     Map, KMLLayer,
     parser, domStyle, GraphicsLayer,
-    Graphic, SimpleFillSymbol, Geometry
+    Graphic, SimpleFillSymbol, Geometry,
+    dom, domAttr, KMLFolder, MarkerSymbol,
+    SimpleMarkerSymbol, SimpleLineSymbol, Color
     ) {
     map = new Map("map", {
         basemap: "gray",
         center: [-122.4194, 37.7749],
         zoom: 10
     });
-
-    parser.parse();
-
+    
     var BARTkml = "http://api.bart.gov/kml/bart.kml";
     
+    var stations = new esri.layers.GraphicsLayer();
+
     //Make sure any variables that will be modified within
     //the on-load method are defined before the KMLLayer
-    //constructor is called.
+    //constructor is called.  
+    parser.parse();
     var kml = new KMLLayer(BARTkml);
+    var stationsList = new Array();
 
     //We can only operate on the KML after it has loaded.
     //When it loads, we take the default kml 
@@ -91,10 +102,9 @@
                 console.log(KMLPoints[i].geometry.x);
                 console.log(KMLPoints[i].geometry.y);
                 
-                //To interact with geometry in the graphics layer
-                //stations.graphics[i].geometry.method()/attribute
-                //console.log(typeof(KMLPoints[i]));
-                //stations.add(new Graphic((KMLPoints[i].geometry), SimpleFillSymbol()));
+                stationsList.push(KMLPoints[i]);
+                
+                stations.add(new esri.Graphic(KMLPoints[i].geometry, new esri.symbol.SimpleMarkerSymbol()));
             }
         }
     
@@ -102,10 +112,8 @@
         //Lastly, we add all of the layers to the map after we've
         //massaged the kml data to our liking.
         map.addLayer(layers[0]);
-        //map.addLayer(stations);
+        map.addLayer(stations);
     });
-    
-    //map.addLayer(kml);
 
   });
 </script>
