@@ -40,20 +40,14 @@
         "dojo/domReady!",
         "esri/layers/GraphicsLayer",
         "esri/graphic",
-        "esri/symbols/SimpleFillSymbol",
-        "dojo/dom",
-        "dojo/dom-attr",
-        "esri/layers/KMLFolder",
-        "esri/symbols/MarkerSymbol",
-        "esri/symbols/SimpleMarkerSymbol",
-        "esri/symbols/SimpleLineSymbol",
-        "esri/Color"
+        "esri/symbols/SimpleFillSymbol"
     ], function(
     Map, KMLLayer,
     parser, domStyle, GraphicsLayer,
     Graphic, SimpleFillSymbol, Geometry,
     dom, domAttr, KMLFolder, MarkerSymbol,
     SimpleMarkerSymbol, SimpleLineSymbol, Color
+
     ) {
     map = new Map("map", {
         basemap: "gray",
@@ -77,10 +71,44 @@
     kml.on("load", function() {
         var layers = kml.getLayers();
 
+
         console.log("KML has two layers.");
         console.log("Layer 1:");
         console.log(layers[0].type);
         console.log(layers[0].geometryType);
+        var KMLPolylines = layers[0].graphics;
+        var j;
+        var line = "";
+        var BARTLines = new Array(6);
+        var index = 0;
+        //relies on being listed sequentially
+        for (j = 0; j < KMLPolylines.length; j++)
+        {
+            var title = KMLPolylines[j].getTitle();
+            if (title !== line) {
+                line = title;
+                BARTLines[index] = KMLPolylines[j].geometry;
+                index++;
+                console.log(line);
+            } else {
+                // in reality I can throw these away? they end up being length 0
+                BARTLines[index-1].addPath(KMLPolylines[j].geometry)
+                console.log("adding path");
+            }
+        }
+        var BARTLinesLayer = new esri.layers.GraphicsLayer();
+        var k;
+        for (k = 0; k < 6; k++) {
+            console.log(k)
+            var g = new esri.Graphic(BARTLines[k], new esri.symbol.SimpleLineSymbol);
+            //var p = new Point([-122.4194, 37.7749],map.spatialReference);
+            //var g = new Graphic({geometry: p});
+            //map.graphics.add(g);
+            BARTLinesLayer.add(g);
+        }
+        map.addLayer(BARTLinesLayer);
+        //console.log(map.graphics.graphics)
+
 
         //The BART kml file is parsed in a way
         //that puts all of the points into one
@@ -113,8 +141,15 @@
         //massaged the kml data to our liking.
         map.addLayer(layers[0]);
         map.addLayer(stations);
+
     });
 
+    //polyPercent()
+    //Find a point x% between points a and b on polyline p
+    function polyPercent(x, a, b, p) {
+
+    }
+    
   });
 </script>
 </head>
