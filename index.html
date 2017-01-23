@@ -106,9 +106,6 @@
             //map.graphics.add(g);
             BARTLinesLayer.add(g);
         }
-        map.addLayer(BARTLinesLayer);
-        //console.log(map.graphics.graphics)
-
 
         //The BART kml file is parsed in a way
         //that puts all of the points into one
@@ -136,12 +133,11 @@
             }
         }
     
-
         //Lastly, we add all of the layers to the map after we've
         //massaged the kml data to our liking.
         map.addLayer(layers[0]);
         map.addLayer(stations);
-
+        map.addLayer(BARTLinesLayer);
     });
 
     //polyPercent()
