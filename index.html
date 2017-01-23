@@ -29,41 +29,84 @@
 
 <script src="https://js.arcgis.com/3.19/"></script>
 <script>
-  var map;
-  require([
-    "esri/map", "esri/layers/KMLLayer",
-    "dojo/parser", "dojo/dom-style",
-
-    "dijit/layout/BorderContainer", "dijit/layout/ContentPane", "dojo/domReady!"
-  ], function(
+    var map;
+    require([
+        "esri/map",
+        "esri/layers/KMLLayer",
+        "dojo/parser",
+        "dojo/dom-style",
+        "dijit/layout/BorderContainer",
+        "dijit/layout/ContentPane",
+        "dojo/domReady!",
+        "esri/layers/GraphicsLayer",
+        "esri/graphic",
+        "esri/symbols/SimpleFillSymbol"
+    ], function(
     Map, KMLLayer,
-    parser, domStyle
-  ) {
+    parser, domStyle, GraphicsLayer,
+    Graphic, SimpleFillSymbol, Geometry
+    ) {
     map = new Map("map", {
-      basemap: "gray",
-      center: [-122.4194, 37.7749],
-      zoom: 10
+        basemap: "gray",
+        center: [-122.4194, 37.7749],
+        zoom: 10
     });
 
     parser.parse();
 
     var BARTkml = "http://api.bart.gov/kml/bart.kml";
+    
+    //Make sure any variables that will be modified within
+    //the on-load method are defined before the KMLLayer
+    //constructor is called.
     var kml = new KMLLayer(BARTkml);
 
     //We can only operate on the KML after it has loaded.
+    //When it loads, we take the default kml 
     kml.on("load", function() {
-      var layers = kml.getLayers();
-      console.log("KML has two layers.");
-      console.log(layers[0].type);
-      console.log(layers[0].geometryType);
+        var layers = kml.getLayers();
 
-      console.log(layers[1].type);
-      console.log(layers[1].geometryType);
+        console.log("KML has two layers.");
+        console.log("Layer 1:");
+        console.log(layers[0].type);
+        console.log(layers[0].geometryType);
 
+        //The BART kml file is parsed in a way
+        //that puts all of the points into one
+        //layer regardless of if it is a station
+        //or an entrance.
+        console.log("Layer 2:");
+        console.log(layers[1].type);
+        console.log(layers[1].graphics.length + "points to parse.");
+        var KMLPoints = layers[1].graphics;
+      
+        //Build a new layer with only the stations.
+        var i;
+        for (i = 0; i < KMLPoints.length; i++)
+        {
+            //If the point doesn't have 'entrance' in the name, it's a station.
+            if (KMLPoints[i].getTitle().indexOf('Entrance') == -1)
+            {
+                console.log(KMLPoints[i].getTitle());
+                console.log(KMLPoints[i].geometry.x);
+                console.log(KMLPoints[i].geometry.y);
+                
+                //To interact with geometry in the graphics layer
+                //stations.graphics[i].geometry.method()/attribute
+                //console.log(typeof(KMLPoints[i]));
+                //stations.add(new Graphic((KMLPoints[i].geometry), SimpleFillSymbol()));
+            }
+        }
+    
 
+        //Lastly, we add all of the layers to the map after we've
+        //massaged the kml data to our liking.
+        map.addLayer(layers[0]);
+        //map.addLayer(stations);
     });
+    
+    //map.addLayer(kml);
 
-    map.addLayer(kml);
   });
 </script>
 </head>
