@@ -16,7 +16,7 @@
 
 <script>
 L.mapbox.accessToken = 'pk.eyJ1IjoibWVwYXZsbyIsImEiOiJjaXpjMHpzaDkweDlmMzJxb3g0OGY3YjE5In0.R5U_n5F4NsW5HGd_4tLqWA';
-var map = L.mapbox.map('map', 'mapbox.streets')
+var map = L.mapbox.map('map', 'mapbox.light')
     .setView([38.1089, 13.3545], 15);
 
 // As with any other AJAX request, this technique is subject to the Same Origin Policy:
@@ -24,8 +24,11 @@ var map = L.mapbox.map('map', 'mapbox.streets')
 // So the CSV file must be on the same domain as the Javascript, or the server
 // delivering it should support CORS.
 var featureLayer = L.mapbox.featureLayer()
-    .loadURL('pavlo.me/StateOfTheBART_Vis/ba-rich-free.geojson')
-    .addTo(map);
+    .loadURL('http://pavlo.me/StateOfTheBART_Vis/ba-rich-free.geojson')
+    .addTo(map)
+    .on('ready', function() {
+        map.fitBounds(featureLayer.getBounds());
+    });;
 </script>
 </body>
 </html>
