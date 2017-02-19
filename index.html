@@ -1,164 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
-<title>State of the BART</title>
-<link rel="stylesheet" href="https://js.arcgis.com/3.19/esri/css/esri.css">
+<meta charset=utf-8 />
+<title>Load GeoJSON from a URL</title>
+<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+<script src='https://api.mapbox.com/mapbox.js/v3.0.1/mapbox.js'></script>
+<link href='https://api.mapbox.com/mapbox.js/v3.0.1/mapbox.css' rel='stylesheet' />
 <style>
-  html, body { height: 100%; width: 100%; margin: 0; padding: 0; }
-  #map { height: 100%; margin: 0; padding: 0; }
-  #meta {
-    position: absolute;
-    left: 20px;
-    bottom: 20px;
-    width: 300px;
-    height: 100px;
-    z-index: 40;
-    background: #fff;
-    color: #777;
-    padding: 5px;
-    border: 2px solid #666;
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    border-radius: 5px;
-    font-family: arial;
-    font-size: 0.9em;
-  }
+  body { margin:0; padding:0; }
+  #map { position:absolute; top:0; bottom:0; width:100%; }
 </style>
-
-<script src="https://js.arcgis.com/3.19/"></script>
-<script>
-    var map;
-    require([
-        "esri/map",
-        "esri/layers/KMLLayer",
-        "dojo/parser",
-        "dojo/dom-style",
-        "dijit/layout/BorderContainer",
-        "dijit/layout/ContentPane",
-        "dojo/domReady!",
-        "esri/layers/GraphicsLayer",
-        "esri/graphic",
-        "esri/symbols/SimpleFillSymbol"
-    ], function(
-    Map, KMLLayer,
-    parser, domStyle, GraphicsLayer,
-    Graphic, SimpleFillSymbol, Geometry,
-    dom, domAttr, KMLFolder, MarkerSymbol,
-    SimpleMarkerSymbol, SimpleLineSymbol, Color
-
-    ) {
-    map = new Map("map", {
-        basemap: "gray",
-        center: [-122.4194, 37.7749],
-        zoom: 10
-    });
-    
-    var BARTkml = "http://api.bart.gov/kml/bart.kml";
-    
-    var stations = new esri.layers.GraphicsLayer();
-
-    //Make sure any variables that will be modified within
-    //the on-load method are defined before the KMLLayer
-    //constructor is called.  
-    parser.parse();
-    var kml = new KMLLayer(BARTkml);
-    var stationsList = new Array();
-
-    //We can only operate on the KML after it has loaded.
-    //When it loads, we take the default kml 
-    kml.on("load", function() {
-        var layers = kml.getLayers();
-
-
-        console.log("KML has two layers.");
-        console.log("Layer 1:");
-        console.log(layers[0].type);
-        console.log(layers[0].geometryType);
-        var KMLPolylines = layers[0].graphics;
-        var j;
-        var line = "";
-        var BARTLines = new Array(6);
-        var index = 0;
-        //relies on being listed sequentially
-        for (j = 0; j < KMLPolylines.length; j++)
-        {
-            var title = KMLPolylines[j].getTitle();
-            if (title !== line) {
-                line = title;
-                BARTLines[index] = KMLPolylines[j].geometry;
-                index++;
-                console.log(line);
-            } else {
-                // in reality I can throw these away? they end up being length 0
-                BARTLines[index-1].addPath(KMLPolylines[j].geometry)
-                console.log("adding path");
-            }
-        }
-        var BARTLinesLayer = new esri.layers.GraphicsLayer();
-        var k;
-        for (k = 0; k < 6; k++) {
-            console.log(k)
-            var g = new esri.Graphic(BARTLines[k], new esri.symbol.SimpleLineSymbol);
-            //var p = new Point([-122.4194, 37.7749],map.spatialReference);
-            //var g = new Graphic({geometry: p});
-            //map.graphics.add(g);
-            BARTLinesLayer.add(g);
-        }
-
-        //The BART kml file is parsed in a way
-        //that puts all of the points into one
-        //layer regardless of if it is a station
-        //or an entrance.
-        console.log("Layer 2:");
-        console.log(layers[1].type);
-        console.log(layers[1].graphics.length + "points to parse.");
-        var KMLPoints = layers[1].graphics;
-      
-        //Build a new layer with only the stations.
-        var i;
-        for (i = 0; i < KMLPoints.length; i++)
-        {
-            //If the point doesn't have 'entrance' in the name, it's a station.
-            if (KMLPoints[i].getTitle().indexOf('Entrance') == -1)
-            {
-                console.log(KMLPoints[i].getTitle());
-                console.log(KMLPoints[i].geometry.x);
-                console.log(KMLPoints[i].geometry.y);
-                
-                stationsList.push(KMLPoints[i]);
-                
-                stations.add(new esri.Graphic(KMLPoints[i].geometry, new esri.symbol.SimpleMarkerSymbol()));
-            }
-        }
-    
-        //Lastly, we add all of the layers to the map after we've
-        //massaged the kml data to our liking.
-        map.addLayer(layers[0]);
-        map.addLayer(stations);
-        map.addLayer(BARTLinesLayer);
-    });
-
-    //polyPercent()
-    //Find a point x% between points a and b on polyline p
-    function polyPercent(x, a, b, p) {
-
-    }
-    
-  });
-</script>
 </head>
-
 <body>
-<div data-dojo-type="dijit/layout/BorderContainer"
-     data-dojo-props="design:'headline',gutters:false"
-     style="width: 100%; height: 100%; margin: 0;">
-  <div id="map"
-       data-dojo-type="dijit/layout/ContentPane"
-       data-dojo-props="region:'center'">
-  </div>
-</div>
+<div id='map'></div>
+
+<script>
+L.mapbox.accessToken = 'pk.eyJ1IjoibWVwYXZsbyIsImEiOiJjaXpjMHpzaDkweDlmMzJxb3g0OGY3YjE5In0.R5U_n5F4NsW5HGd_4tLqWA';
+var map = L.mapbox.map('map', 'mapbox.streets')
+    .setView([38.1089, 13.3545], 15);
+
+// As with any other AJAX request, this technique is subject to the Same Origin Policy:
+// http://en.wikipedia.org/wiki/Same_origin_policy
+// So the CSV file must be on the same domain as the Javascript, or the server
+// delivering it should support CORS.
+var featureLayer = L.mapbox.featureLayer()
+    .loadURL('pavlo.me/StateOfTheBART_Vis/ba-rich-free.geojson')
+    .addTo(map);
+</script>
 </body>
 </html>
-
