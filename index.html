@@ -30,7 +30,7 @@ var geojsonLayer = L.geoJson.ajax('http://pavlo.me/StateOfTheBART_Vis/RICH-MILB.
 
             for (i = 0; i < temp.geometry.coordinates.length; i++)
             {
-                rich_fre_polyline.addLatLng(L.latLng(temp.geometry.coordinates[i][1], temp.geometry.coordinates[i][0]));
+                rich_fre_polyline.addLatLng(L.latLng(temp.geometry.coordinates[i][0], temp.geometry.coordinates[i][1]));
             }
 
             map.addLayer(rich_fre_polyline);            
